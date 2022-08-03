@@ -1,0 +1,51 @@
+--- Questão 1
+	SELECT ord.order_id ID_pedido,
+	   oi.order_item_id ID_item,
+       sel.seller_state UF_Vendedor,
+	   cust.customer_state UF_Cliente,
+	   ord.order_purchase_timestamp Data_compra,
+	   ord.order_delivered_carrier_date Data_postagem,
+	   CAST(julianday(ord.order_delivered_carrier_date) - julianday(ord.order_purchase_timestamp) AS INTEGER) Dias_para_postagem,
+	   ord.order_delivered_customer_date Data_entrega,
+	   ord.order_estimated_delivery_date Previsão_entrega,
+	   CASE
+	   WHEN CAST(julianday(ord.order_estimated_delivery_date) - julianday(ord.order_delivered_customer_date) AS INTEGER) >= 0 THEN 'SIM'
+	   WHEN CAST(julianday(ord.order_estimated_delivery_date) - julianday(ord.order_delivered_customer_date) AS INTEGER) < 0 THEN 'NÃO'
+	   ELSE 'INDEFINIDO' END Entregou_no_prazo
+FROM customers cust
+INNER JOIN orders ord ON cust.customer_id = ord.customer_id
+INNER JOIN order_items oi ON ord.order_id = oi.order_id
+INNER JOIN sellers sel ON oi.seller_id = sel.seller_id
+WHERE sel.seller_state != cust.customer_state
+
+
+--- Questão 2
+
+SELECT * 
+FROM (
+SELECT ORD.order_id, 
+		ORD.order_approved_at,
+		SUM(PAY.payment_value) AS VL_COMPRA,
+		SUM(PAY.payment_value) OVER(PARTITION BY CUST.customer_unique_id) AS VL_TOTAL_GASTO
+FROM order_payments AS PAY 
+JOIN orders AS ORD ON PAY.order_id = ORD.order_id
+JOIN customers AS CUST ON ORD.customer_id = CUST.customer_id
+GROUP BY ORD.order_id, ORD.order_approved_at
+) TB
+WHERE VL_COMPRA <> VL_TOTAL_GASTO;
+	
+--- Questão 3
+
+SELECT product_category_name,
+		VALOR_VENDIDO,
+		RANK() OVER(ORDER BY VALOR_VENDIDO DESC) RANK_VALOR,
+		SUM(VALOR_VENDIDO) OVER(ORDER BY VALOR_VENDIDO DESC) SOMA
+
+FROM(
+	SELECT PRD.product_category_name,
+			ROUND(SUM(OI.price + OI.freight_value),2) AS VALOR_VENDIDO
+	FROM products PRD
+	JOIN order_items OI ON PRD.product_id = OI.product_id
+	GROUP BY PRD.product_category_name
+)
+ORDER BY RANK_VALOR
