@@ -1,0 +1,37 @@
+--- Questão 1
+
+Select count(order_item_id) as Quantidade,
+product_category_name as Categoria,
+customer_state as Estado
+from order_items
+	JOIN products ON products.product_id = order_items.product_id
+	JOIN orders ON orders.order_id = order_items.order_id
+	JOIN customers ON customers.customer_id = orders.customer_id
+		GROUP BY product_category_name, customer_state
+		HAVING count(order_item_id) > 1000;
+
+--- Questão 2
+
+	SELECT CUS.customer_unique_id,
+	   SUM(PAY.payment_value) VALOR_GASTO,
+	   count(DISTINCT ORD.order_id) QUATIDADE_COMPRAS,
+	   avg(PAY.payment_value) TICKET_MEDIO
+FROM customers CUS
+JOIN orders ORD ON CUS.customer_id = ORD.customer_id
+JOIN order_payments PAY ON ORD.order_id = PAY.order_id
+GROUP BY CUS.customer_unique_id
+ORDER BY VALOR_GASTO DESC
+LIMIT 5;
+
+--- Questão 3
+
+SELECT PRD.product_category_name,
+	   SEL.seller_id,
+	   SUM(OIT.PRICE) VALOR_VENDIDO
+FROM sellers SEL
+JOIN order_items OIT ON SEL.seller_id = OIT.seller_id
+JOIN products PRD ON OIT.product_id = PRD.product_id
+GROUP BY PRD.product_category_name,
+		 SEL.seller_id
+HAVING SUM(OIT.PRICE) > 1000
+ORDER BY VALOR_VENDIDO DESC;
