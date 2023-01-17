@@ -1,5 +1,10 @@
-### Awari
+# Awari
 
-### Awari Course Exercise
+## Introduction
 
-### Neste Repositório encontramos diversos exercicios feitos no curso da Awari sobre Ciencia de dados.
+In this Repository we find several exercises done using Machine Learning, Matplotlib, Pandas, Python, Seaborn, SQL in the Awari course on Data Science.
+
+## Technology Used
+
+- Python
+- SQL
